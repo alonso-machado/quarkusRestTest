@@ -232,4 +232,18 @@ class CarResourceTest {
 				.extract().response();
 		assertThat(response.jsonPath().getList("name"), Matchers.hasItems("Uno Mille", "x1"));
 	}
+
+	@Test
+	@Order(14)
+	void testListAllCarsPagedWrongDefaultingToListAll() {
+		//List all, with wrong page, so it will default to List all elements without paging
+		Response response = given()
+				.when()
+				.get("/car/?pageIndex=5")
+				.then()
+				.statusCode(RestResponse.Status.OK.getStatusCode())
+				.contentType("application/json")
+				.extract().response();
+		assertThat(response.jsonPath().getList("name"), Matchers.hasItems("Uno Mille", "x1"));
+	}
 }
