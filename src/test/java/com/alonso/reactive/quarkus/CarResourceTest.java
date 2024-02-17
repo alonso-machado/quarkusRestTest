@@ -4,7 +4,8 @@ import com.alonso.reactive.quarkus.model.dto.CarRecord;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.response.Response;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
+import org.jboss.resteasy.reactive.RestResponse;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -18,38 +19,41 @@ import static org.hamcrest.text.IsEmptyString.emptyString;
 public class CarResourceTest {
 
 	@Test
+	@Order(0)
 	public void testListAllCars() {
-		//List all, should have all 3 fruits the database has initially:
+		//List all, should have all some of the cars the database has initially (import.sql)
 		Response response = given()
 				.when()
-				.get("/")
+				.get("/car/")
 				.then()
-				.statusCode(200)
+				.statusCode(RestResponse.Status.OK.getStatusCode())
 				.contentType("application/json")
 				.extract().response();
-		assertThat(response.jsonPath().getList("name"), Matchers.containsInAnyOrder(List.of("F150", "Enzo", "Uno Mille")));
+		assertThat(response.jsonPath().getList("name"), Matchers.hasItems("Diablo", "Enzo", "Uno Mille", "x1"));
 	}
 
 	@Test
+	@Order(1)
 	public void testEntityNotFoundForDelete() {
 		given()
 				.when()
 				.delete("/car/999")
 				.then()
-				.statusCode(404)
+				.statusCode(RestResponse.Status.NOT_FOUND.getStatusCode())
 				.body(emptyString());
 	}
 
 	@Test
+	@Order(2)
 	public void testEntityNotFoundForUpdate() {
-		CarRecord carRecord = new CarRecord("Fusion", "Ford", BigDecimal.valueOf(20000));
+		CarRecord carRecord = new CarRecord("Fusion", "Ford", BigDecimal.valueOf(99000));
 		given()
 				.when()
 				.body(carRecord)
 				.contentType("application/json")
 				.put("/car/6767")
 				.then()
-				.statusCode(404)
+				.statusCode(RestResponse.Status.NOT_FOUND.getStatusCode())
 				.body(emptyString());
 	}
 }

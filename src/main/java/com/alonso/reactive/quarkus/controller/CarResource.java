@@ -48,7 +48,7 @@ public class CarResource {
 	@GET
 	@Path("/")
 	@Operation(summary = "Retrieves all cars")
-	public PanacheQuery<PanacheEntityBase> getAll() {
+	public Uni<List<Car>> getAll() {
 		return carRepository.getAll();
 	}
 
@@ -64,7 +64,7 @@ public class CarResource {
 			)
 	)
 	public Uni<Car> getSingle(@Parameter(name = "id", required = true) @PathParam("id") Long id) {
-		return carRepository.getSingle(id);
+		return carRepository.getSingleById(id);
 	}
 
 	@GET
@@ -113,7 +113,7 @@ public class CarResource {
 	@Operation(summary = "Delete a car")
 	@Transactional
 	@NonBlocking
-	public Uni<Boolean> deleteSingle(@Parameter(name = "id", required = true) @PathParam("id") Long id) {
+	public Uni<RestResponse> deleteSingle(@Parameter(name = "id", required = true) @PathParam("id") Long id) {
 		return carRepository.deleteSingle(id);
 	}
 }

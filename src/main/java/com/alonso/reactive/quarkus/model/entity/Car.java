@@ -7,12 +7,14 @@ import jakarta.validation.constraints.DecimalMin;
 
 import java.math.BigDecimal;
 
+/* //Using this to avoid PanacheEntity @GeneratedValue that Default to AUTO and break the Tests */
 @Entity
+@Table(name = "car")
 @Cacheable
 public class Car extends PanacheEntityBase {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	public Long id;
 
 	@Column(length = 25)

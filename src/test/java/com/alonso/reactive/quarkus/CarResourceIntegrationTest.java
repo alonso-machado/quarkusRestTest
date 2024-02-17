@@ -2,13 +2,16 @@ package com.alonso.reactive.quarkus;
 
 import com.alonso.reactive.quarkus.model.dto.CarRecord;
 import io.quarkus.test.junit.QuarkusTest;
+import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.equalTo;
 
 @QuarkusTest
 public class CarResourceIntegrationTest {
@@ -33,7 +36,7 @@ public class CarResourceIntegrationTest {
 		given()
 				.when().get("/car/{id}", carId)
 				.then()
-				.statusCode(200)
+				.statusCode(RestResponse.Status.OK.getStatusCode())
 				.body("id", is(carId));
 	}
 
@@ -41,13 +44,14 @@ public class CarResourceIntegrationTest {
 	@Order(3)
 	public void testGetCarByRange() {
 		// Given
-		long carId = 1L;
+		Double startPrice = 9500.0;
+		Double finalPrice = 110000.0;
 
 		// When/Then
 		given()
-				.when().get("/car/{id}", carId)
+				.when().get("/car/price-range/{startPrice}/{finalPrice}", startPrice, finalPrice)
 				.then()
-				.statusCode(204);
+				.statusCode(RestResponse.Status.OK.getStatusCode());
 	}
 
 	@Test
@@ -60,7 +64,7 @@ public class CarResourceIntegrationTest {
 		given()
 				.when().get("/car/{id}", carId)
 				.then()
-				.statusCode(204);
+				.statusCode(RestResponse.Status.NO_CONTENT.getStatusCode());
 	}
 
 	@Test
@@ -73,7 +77,7 @@ public class CarResourceIntegrationTest {
 		given().header("Content-type", "application/json")
 				.when().delete("/car/{id}", carId)
 				.then()
-				.statusCode(204);
+				.statusCode(RestResponse.Status.NO_CONTENT.getStatusCode());
 	}
 
 	@Test
@@ -89,7 +93,7 @@ public class CarResourceIntegrationTest {
 				.body(carRecord)
 				.when().put("/car/{id}", carId)
 				.then()
-				.statusCode(204);
+				.statusCode(RestResponse.Status.NOT_FOUND.getStatusCode());
 	}
 
 	@Test
@@ -104,6 +108,21 @@ public class CarResourceIntegrationTest {
 				.body(carRecord)
 				.when().post("/car")
 				.then()
-				.statusCode(204);
+				.statusCode(RestResponse.Status.CREATED.getStatusCode());
+	}
+
+	@Test
+	@Order(8)
+	public void testGetCarByRangeNotPossible() {
+		// Given
+		Double startPrice = 0.0;
+		Double finalPrice = 1.0;
+
+		// When/Then
+		given()
+				.when().get("/car/price-range/{startPrice}/{finalPrice}", startPrice, finalPrice)
+				.then()
+				.statusCode(RestResponse.Status.OK.getStatusCode())
+				.body("", equalTo(Collections.emptyList()));
 	}
 }

@@ -6,8 +6,6 @@ import com.alonso.reactive.quarkus.repository.CarRepository;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.PathParam;
-import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.jboss.resteasy.reactive.RestResponse;
 
 import java.math.BigDecimal;
@@ -29,8 +27,8 @@ public class CarService {
 	}
 
 	public Uni<RestResponse<Car>> update(Long id, CarRecord car) {
-		if(carRepository.findById(id) == null) {
-			return carRepository.update(carMapper(car));
+		if (carRepository.findById(id) == null) {
+			return carRepository.updatePanache(id, carMapper(car));
 		} else {
 			//Maybe throw an exception
 			return Uni.createFrom().nullItem();
@@ -38,7 +36,7 @@ public class CarService {
 	}
 
 	public Uni<List<Car>> getCarByPrice(Double startPrice, Double finalPrice) {
-		return carRepository.findByPrice(BigDecimal.valueOf(startPrice),BigDecimal.valueOf(finalPrice));
+		return carRepository.findByPrice(BigDecimal.valueOf(startPrice), BigDecimal.valueOf(finalPrice));
 	}
 
 	private Car carMapper(CarRecord carRecord) {
