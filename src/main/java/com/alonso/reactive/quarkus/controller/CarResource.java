@@ -45,7 +45,7 @@ public class CarResource {
 
 	@GET
 	@Path("/")
-	@Operation(summary = "Retrieves all cars")
+	@Operation(summary = "Retrieves all cars (Paginated or All)")
 	public Uni<List<Car>> getAll(@Parameter(name = "pageIndex", required = false) @QueryParam("pageIndex") @Min(value = 0) Integer pageIndex,
 	                             @Parameter(name = "pageSize", required = false) @QueryParam("pageSize") @Min(value = 1) @Max(value = 20) Integer pageSize) {
 		if (pageIndex != null && pageSize != null) {
@@ -72,21 +72,21 @@ public class CarResource {
 
 	@GET
 	@Path("/name/{name}")
-	@Operation(summary = "Retrieves a car by name")
+	@Operation(summary = "Returns a car by name")
 	public Uni<Car> getCarByName(@Parameter(name = "name", required = true) @PathParam("name") String name) {
 		return carRepository.findByName(name);
 	}
 
 	@GET
 	@Path("/brand/{name}")
-	@Operation(summary = "Retrieves a cars by brand name")
+	@Operation(summary = "Retrieves all cars by brand name")
 	public Uni<List<Car>> getCarByBrand(@Parameter(name = "name", required = true) @PathParam("name") String name) {
 		return carRepository.findByBrand(name);
 	}
 
 	@GET
 	@Path("/price-range/")
-	@Operation(summary = "Retrieves a cars by price")
+	@Operation(summary = "Retrieves all cars by price")
 	public Uni<List<Car>> getCarByPrice(@Parameter(name = "startPrice", required = true) @QueryParam("startPrice") @Min(value = 0) Double startPrice,
 	                                    @Parameter(name = "finalPrice", required = true) @QueryParam("finalPrice") @Max(value = 15000000) Double finalPrice) {
 		return carService.getCarByPrice(startPrice, finalPrice);

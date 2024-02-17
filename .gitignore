@@ -1,5 +1,10 @@
 maven-wrapper.jar
+
+*.mvn
 .mvn
-.idea/
+
 .idea/*
+*.idea
+
 target/
+*/target

@@ -12,3 +12,13 @@ services:
       - "14250:14250" # Receive from external otel-collector, optional
     environment:
       - COLLECTOR_OTLP_ENABLED=true
+
+  database-postgres14:
+    image: 'postgres:14'
+    ports:
+      - 5432:5432
+
+    environment:
+      POSTGRES_USER: john # The PostgreSQL user (useful to connect to the database)
+      POSTGRES_PASSWORD: doe # The PostgreSQL password (useful to connect to the database)
+      POSTGRES_DB: quarkus_test # The PostgreSQL default database (automatically created at first launch)
