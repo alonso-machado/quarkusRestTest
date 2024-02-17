@@ -4,14 +4,11 @@ import com.alonso.reactive.quarkus.model.entity.Car;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
-import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.quarkus.panache.common.Parameters;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.WebApplicationException;
-import org.hibernate.reactive.mutiny.Mutiny;
 import org.jboss.resteasy.reactive.RestResponse;
 
 import java.math.BigDecimal;
@@ -22,9 +19,6 @@ import static org.jboss.resteasy.reactive.RestResponse.StatusCode.NOT_FOUND;
 
 @ApplicationScoped
 public class CarRepository implements PanacheRepository<Car> {
-
-	@Inject
-	Mutiny.SessionFactory sf;
 
 	@Transactional
 	public Uni<Car> findByName(String name) {
@@ -38,17 +32,9 @@ public class CarRepository implements PanacheRepository<Car> {
 
 	@WithSession
 	public Uni<Car> getSingleById(Long id) {
-		String nativeQuery = "SELECT * FROM car WHERE id = " + id;
-		return Car.findById(id);
-		//return find("id = :id", Parameters.with("id", id)).firstResult();
-		//return sf.withTransaction((s, t) -> s.find(Car.class, id));
-		/*return Panache.getSession().onItem()
-				.transformToUni(session ->
-						session.createNativeQuery(nativeQuery, Car.class)
-								.getSingleResultOrNull());*/
-		/*return sf.withSession( session -> session
-				.createNativeQuery( nativeQuery, Car.class ).getSingleResultOrNull()
-		);*/
+		return Car.<Car>findById(id)
+				.onItem().ifNull().failWith(new WebApplicationException("Car missing from database.", NOT_FOUND))
+				.onItem().ifNotNull().transformToUni(e -> Uni.createFrom().item(e));
 	}
 
 	@Transactional
@@ -57,26 +43,16 @@ public class CarRepository implements PanacheRepository<Car> {
 	}
 
 	@Transactional
+	public Uni<List<Car>> getAllPaged(Integer pageIndex, Integer pageSize) {
+		return Car.findAll().page(pageIndex, pageSize).list();
+	}
+
+	@Transactional
 	public Uni<RestResponse<Car>> create(Car car) {
 		return Panache.withTransaction(car::persist).replaceWith(RestResponse.status(CREATED, car));
 	}
 
-	//PUT from https://github.com/quarkusio/quarkus-quickstarts/blob/main/hibernate-reactive-quickstart/src/main/java/org/acme/hibernate/reactive/FruitMutinyResource.java
-
-	@Transactional
-	public Uni<RestResponse<Car>> updateWithoutPanache(Long id, Car car) {
-		return sf.withTransaction((s, t) -> s.find(Car.class, id)
-						.onItem().ifNull().failWith(new WebApplicationException("Car missing from database.", NOT_FOUND))
-						.onItem().ifNotNull().invoke(entity -> {
-							entity.manufacturingValue = car.manufacturingValue;
-							entity.name = car.name;
-							entity.brand = car.brand;
-							entity.description = car.description;
-						}))
-				.map(entity -> RestResponse.status(ACCEPTED, entity));
-	}
-
-	//Put2 https://github.com/quarkusio/quarkus-quickstarts/blob/main/hibernate-reactive-panache-quickstart/src/main/java/org/acme/hibernate/orm/panache/FruitResource.java
+	//Put https://github.com/quarkusio/quarkus-quickstarts/blob/main/hibernate-reactive-panache-quickstart/src/main/java/org/acme/hibernate/orm/panache/FruitResource.java
 	@Transactional
 	public Uni<RestResponse<Car>> updatePanache(Long id, Car car) {
 		return Panache.withTransaction(() -> Car.<Car>findById(id)

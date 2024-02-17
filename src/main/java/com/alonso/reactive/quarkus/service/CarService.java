@@ -27,12 +27,7 @@ public class CarService {
 	}
 
 	public Uni<RestResponse<Car>> update(Long id, CarRecord car) {
-		if (carRepository.findById(id) == null) {
-			return carRepository.updatePanache(id, carMapper(car));
-		} else {
-			//Maybe throw an exception
-			return Uni.createFrom().nullItem();
-		}
+		return carRepository.updatePanache(id, carMapper(car));
 	}
 
 	public Uni<List<Car>> getCarByPrice(Double startPrice, Double finalPrice) {

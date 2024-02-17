@@ -4,8 +4,6 @@ import com.alonso.reactive.quarkus.model.dto.CarRecord;
 import com.alonso.reactive.quarkus.model.entity.Car;
 import com.alonso.reactive.quarkus.repository.CarRepository;
 import com.alonso.reactive.quarkus.service.CarService;
-import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
-import io.quarkus.hibernate.reactive.panache.PanacheQuery;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.common.annotation.NonBlocking;
 import io.smallrye.mutiny.Uni;
@@ -48,8 +46,13 @@ public class CarResource {
 	@GET
 	@Path("/")
 	@Operation(summary = "Retrieves all cars")
-	public Uni<List<Car>> getAll() {
-		return carRepository.getAll();
+	public Uni<List<Car>> getAll(@Parameter(name = "pageIndex", required = false) @QueryParam("pageIndex") @Min(value = 0) Integer pageIndex,
+	                             @Parameter(name = "pageSize", required = false) @QueryParam("pageSize") @Min(value = 1) @Max(value = 20) Integer pageSize) {
+		if (pageIndex != null && pageSize != null) {
+			return carRepository.getAllPaged(pageIndex, pageSize);
+		} else {
+			return carRepository.getAll();
+		}
 	}
 
 	@GET
@@ -68,7 +71,7 @@ public class CarResource {
 	}
 
 	@GET
-	@Path("/{name}")
+	@Path("/name/{name}")
 	@Operation(summary = "Retrieves a car by name")
 	public Uni<Car> getCarByName(@Parameter(name = "name", required = true) @PathParam("name") String name) {
 		return carRepository.findByName(name);
@@ -82,10 +85,10 @@ public class CarResource {
 	}
 
 	@GET
-	@Path("/price-range/{startPrice}/{finalPrice}")
+	@Path("/price-range/")
 	@Operation(summary = "Retrieves a cars by price")
-	public Uni<List<Car>> getCarByPrice(@Parameter(name = "startPrice", required = true) @PathParam("startPrice") @Min(value = 0) Double startPrice,
-	                                    @Parameter(name = "finalPrice", required = true) @PathParam("finalPrice") @Max(value = 15000000) Double finalPrice) {
+	public Uni<List<Car>> getCarByPrice(@Parameter(name = "startPrice", required = true) @QueryParam("startPrice") @Min(value = 0) Double startPrice,
+	                                    @Parameter(name = "finalPrice", required = true) @QueryParam("finalPrice") @Max(value = 15000000) Double finalPrice) {
 		return carService.getCarByPrice(startPrice, finalPrice);
 	}
 
