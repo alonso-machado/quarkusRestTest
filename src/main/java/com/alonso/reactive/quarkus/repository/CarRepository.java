@@ -1,5 +1,6 @@
 package com.alonso.reactive.quarkus.repository;
 
+import com.alonso.reactive.quarkus.exception.CarNotFoundException;
 import com.alonso.reactive.quarkus.model.entity.Car;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
@@ -8,7 +9,6 @@ import io.quarkus.panache.common.Parameters;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
-import jakarta.ws.rs.WebApplicationException;
 import org.jboss.resteasy.reactive.RestResponse;
 
 import java.math.BigDecimal;
@@ -16,6 +16,7 @@ import java.util.List;
 
 import static org.jboss.resteasy.reactive.RestResponse.Status.*;
 import static org.jboss.resteasy.reactive.RestResponse.StatusCode.NOT_FOUND;
+import static org.jboss.resteasy.reactive.RestResponse.status;
 
 @ApplicationScoped
 public class CarRepository implements PanacheRepository<Car> {
@@ -33,7 +34,7 @@ public class CarRepository implements PanacheRepository<Car> {
 	@WithSession
 	public Uni<Car> getSingleById(Long id) {
 		return Car.<Car>findById(id)
-				.onItem().ifNull().failWith(new WebApplicationException("Car missing from database.", NOT_FOUND))
+				.onItem().ifNull().failWith(CarNotFoundException::new)
 				.onItem().ifNotNull().transformToUni(e -> Uni.createFrom().item(e));
 	}
 
@@ -49,7 +50,7 @@ public class CarRepository implements PanacheRepository<Car> {
 
 	@Transactional
 	public Uni<RestResponse<Car>> create(Car car) {
-		return Panache.withTransaction(car::persist).replaceWith(RestResponse.status(CREATED, car));
+		return Panache.withTransaction(car::persist).replaceWith(status(CREATED, car));
 	}
 
 	//Put https://github.com/quarkusio/quarkus-quickstarts/blob/main/hibernate-reactive-panache-quickstart/src/main/java/org/acme/hibernate/orm/panache/FruitResource.java
@@ -62,22 +63,22 @@ public class CarRepository implements PanacheRepository<Car> {
 					entity.description = car.description;
 					entity.manufacturingValue = car.manufacturingValue;
 				})
-				.onItem().ifNull().failWith(new WebApplicationException("Car missing from database.", NOT_FOUND))
-		).onItem().ifNotNull().transform(entity -> RestResponse.status(ACCEPTED, entity));
+				.onItem().ifNull().failWith(CarNotFoundException::new)
+		).onItem().ifNotNull().transform(entity -> status(ACCEPTED, entity));
 	}
 
 
 	@Transactional
 	public Uni<RestResponse> deleteSingle(Long id) {
 		return Panache.withTransaction(() -> Car.deleteById(id))
-				.map(deleted -> deleted
-						? RestResponse.status(NO_CONTENT)
-						: RestResponse.status(NOT_FOUND));
+				.map(deleted -> Boolean.TRUE.equals(deleted)
+						? status(NO_CONTENT)
+						: status(NOT_FOUND));
 	}
 
 	@Transactional
 	public Uni<List<Car>> findByPrice(BigDecimal startPrice, BigDecimal finalPrice) {
 		return list("manufacturingValue BETWEEN :startPrice AND :finalPrice", Parameters.with("startPrice", startPrice).and("finalPrice", finalPrice))
-				.onItem().ifNull().failWith(new WebApplicationException("Car missing from database.", NOT_FOUND));
+				.onItem().ifNull().failWith(CarNotFoundException::new);
 	}
 }

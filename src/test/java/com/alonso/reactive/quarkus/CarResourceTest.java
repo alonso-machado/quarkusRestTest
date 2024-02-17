@@ -17,11 +17,11 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.text.IsEmptyString.emptyString;
 
 @QuarkusTest
-public class CarResourceTest {
+class CarResourceTest {
 
 	@Test
 	@Order(0)
-	public void testListAllCars() {
+	void testListAllCars() {
 		//List all, should have all some of the cars the database has initially (import.sql)
 		Response response = given()
 				.when()
@@ -35,7 +35,7 @@ public class CarResourceTest {
 
 	@Test
 	@Order(1)
-	public void testEntityNotFoundForDelete() {
+	void testEntityNotFoundForDelete() {
 		given()
 				.when()
 				.delete("/car/999")
@@ -46,7 +46,7 @@ public class CarResourceTest {
 
 	@Test
 	@Order(2)
-	public void testEntityNotFoundForUpdate() {
+	void testEntityNotFoundForUpdate() {
 		CarRecord carRecord = new CarRecord("Fusion", "Ford", BigDecimal.valueOf(99000), "Hatchback");
 		given()
 				.when()
@@ -60,7 +60,7 @@ public class CarResourceTest {
 
 	@Test
 	@Order(3)
-	public void testEntityNotFoundForGetId() {
+	void testEntityNotFoundForGetId() {
 		given()
 				.when()
 				.contentType("application/json")
@@ -72,7 +72,7 @@ public class CarResourceTest {
 
 	@Test
 	@Order(4)
-	public void testEntityNotFoundForGetName() {
+	void testEntityNotFoundForGetName() {
 		given()
 				.when()
 				.contentType("application/json")
@@ -84,7 +84,7 @@ public class CarResourceTest {
 
 	@Test
 	@Order(5)
-	public void testEntityFoundForGetName() {
+	void testEntityFoundForGetName() {
 		Response response = given()
 				.when()
 				.contentType("application/json")
@@ -99,7 +99,7 @@ public class CarResourceTest {
 
 	@Test
 	@Order(6)
-	public void testGetCarByBrandName() {
+	void testGetCarByBrandName() {
 		// Given
 		String carBrand = "Ferrari";
 
@@ -115,7 +115,7 @@ public class CarResourceTest {
 
 	@Test
 	@Order(7)
-	public void testGetCarByBrandNameNonExistent() {
+	void testGetCarByBrandNameNonExistent() {
 		// Given
 		String carBrand = "TestNonExistent";
 
@@ -130,7 +130,7 @@ public class CarResourceTest {
 
 	@Test
 	@Order(8)
-	public void testUpdateCar() {
+	void testUpdateCar() {
 		// Given
 		long carId = 1L;
 		CarRecord carRecord = new CarRecord("Fusion", "Ford", BigDecimal.valueOf(70000), "Hatchback");
@@ -146,7 +146,7 @@ public class CarResourceTest {
 
 	@Test
 	@Order(9)
-	public void testDeleteCar() {
+	void testDeleteCar() {
 		// Given
 		long carId = 1L;
 
@@ -159,7 +159,7 @@ public class CarResourceTest {
 
 	@Test
 	@Order(10)
-	public void testPostCar() {
+	void testPostCar() {
 		// Given
 		CarRecord carRecord = new CarRecord("Ka", "Ford", BigDecimal.valueOf(25000), "Mini Car");
 
@@ -174,7 +174,7 @@ public class CarResourceTest {
 
 	@Test
 	@Order(11)
-	public void testGetCarByRangeNotPossible() {
+	void testGetCarByRangeNotPossible() {
 		// Given
 		Double startPrice = 0.0;
 		Double finalPrice = 1.0;
@@ -189,7 +189,7 @@ public class CarResourceTest {
 
 	@Test
 	@Order(12)
-	public void testGetCarByRange() {
+	void testGetCarByRange() {
 		// Given
 		Double startPrice = 9500.0;
 		Double finalPrice = 110000.0;
@@ -206,7 +206,7 @@ public class CarResourceTest {
 
 	@Test
 	@Order(13)
-	public void testGetCarById() {
+	void testGetCarById() {
 		// Given
 		Long carId = 3L;
 
@@ -221,7 +221,7 @@ public class CarResourceTest {
 
 	@Test
 	@Order(14)
-	public void testListAllCarsPaged() {
+	void testListAllCarsPaged() {
 		//List all, should have all some of the cars the database has initially (import.sql)
 		Response response = given()
 				.when()
