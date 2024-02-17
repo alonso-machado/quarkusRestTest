@@ -1,0 +1,5 @@
+com\alonso\reactive\quarkus\repository\CarRepository.class
+com\alonso\reactive\quarkus\service\CarService.class
+META-INF\panache-archive.marker
+com\alonso\reactive\quarkus\controller\CarResource.class
+com\alonso\reactive\quarkus\model\entity\Car.class
